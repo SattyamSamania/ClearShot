@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClearShot — Remove text, erase, crop. Free, no signup.</title>
+<meta name="description" content="Remove text, watermarks, and backgrounds from any image. Free, private, no signup. Everything runs in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16140f;
+    --paper: #f6f3ec;
+    --paper-dim: #ece7da;
+    --rust: #b5482e;
+    --rust-dim: #8f3a25;
+    --moss: #4a5a3f;
+    --line: rgba(22, 20, 15, 0.14);
+    --line-strong: rgba(22, 20, 15, 0.28);
+    --shadow: rgba(22, 20, 15, 0.18);
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --sans: "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(22,20,15,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    padding: 28px 0 18px;
+    border-bottom: 1.5px solid var(--line-strong);
+  }
+  .header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .logo .dot { color: var(--rust); }
+  .tagline {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    opacity: 0.62;
+    text-transform: uppercase;
+  }
+  .badges {
+    display: flex;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .badge {
+    border: 1.3px solid var(--line-strong);
+    padding: 5px 10px;
+    border-radius: 100px;
+    color: var(--moss);
+    background: rgba(74,90,63,0.06);
+  }
+
+  /* ---------- Hero / empty state ---------- */
+  .hero {
+    padding: 64px 0 56px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  @media (max-width: 880px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rust-dim);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 52px;
+    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 20px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--rust);
+    font-weight: 500;
+  }
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    opacity: 0.78;
+    max-width: 480px;
+    margin: 0 0 32px;
+  }
+
+  .dropzone {
+    border: 2px dashed var(--line-strong);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.4);
+    padding: 56px 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  }
+  .dropzone:hover, .dropzone.drag {
+    border-color: var(--rust);
+    background: rgba(181,72,46,0.05);
+  }
+  .dropzone .dz-icon {
+    width: 46px; height: 46px;
+    margin: 0 auto 16px;
+    color: var(--rust);
+  }
+  .dropzone .dz-title {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .dropzone .dz-sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  #fileInput { display: none; }
+
+  .hero-art {
+    display: flex;
+    justify-content: center;
+  }
+  .hero-art svg { width: 100%; max-width: 360px; height: auto; }
+
+  .trust-row {
+    display: flex;
+    gap: 28px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+    opacity: 0.62;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .trust-item svg { width: 14px; height: 14px; color: var(--moss); flex-shrink: 0; }
+
+  /* ---------- Editor ---------- */
+  #editorView { display: none; padding: 32px 0 80px; }
+  .editor-shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 1px 0 var(--line);
+  }
+  @media (max-width: 880px) {
+    .editor-shell { grid-template-columns: 1fr; }
+  }
+
+  .toolbar {
+    background: var(--paper-dim);
+    border-right: 1.5px solid var(--line-strong);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  @media (max-width: 880px) {
+    .toolbar {
+      border-right: none;
+      border-bottom: 1.5px solid var(--line-strong);
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+  }
+
+  .tool-group { display: flex; flex-direction: column; gap: 8px; }
+  .tool-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.5;
+    margin-bottom: 2px;
+  }
+
+  .tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1.3px solid transparent;
+    background: transparent;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  .tool-btn svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+  .tool-btn:hover { background: rgba(22,20,15,0.05); }
+  .tool-btn.active {
+    background: var(--rust);
+    color: var(--paper);
+    border-color: var(--rust);
+  }
+  .tool-btn.active svg { opacity: 1; }
+
+  .slider-row { display: flex; flex-direction: column; gap: 6px; }
+  .slider-row .slabel {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; opacity: 0.6;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--rust);
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 14px;
+    border-radius: 9px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--paper);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.12s ease;
+  }
+  .action-btn:hover { border-color: var(--rust); color: var(--rust-dim); }
+  .action-btn.primary {
+    background: var(--moss);
+    border-color: var(--moss);
+    color: var(--paper);
+  }
+  .action-btn.primary:hover { background: #3d4b34; }
+  .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .action-btn svg { width: 15px; height: 15px; }
+
+  .canvas-area {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    min-height: 520px;
+    justify-content: center;
+    position: relative;
+  }
+  .canvas-stage {
+    position: relative;
+    line-height: 0;
+    box-shadow: 0 8px 28px var(--shadow);
+    border-radius: 4px;
+    background:
+      conic-gradient(rgba(0,0,0,0.06) 90deg, transparent 90deg 180deg, rgba(0,0,0,0.06) 180deg 270deg, transparent 270deg) 0 0 / 20px 20px;
+  }
+  .canvas-stage canvas {
+    display: block;
+    max-width: 100%;
+    border-radius: 4px;
+    cursor: crosshair;
+  }
+  .brush-cursor {
+    position: absolute;
+    border: 1.5px solid var(--rust);
+    border-radius: 50%;
+    background: rgba(181,72,46,0.12);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+
+  .crop-overlay {
+    position: absolute;
+    border: 1.5px dashed var(--paper);
+    box-shadow: 0 0 0 2000px rgba(22,20,15,0.45);
+    cursor: move;
+  }
+  .crop-handle {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--paper);
+    border: 1.5px solid var(--rust);
+    border-radius: 50%;
+  }
+
+  .status-bar {
+    font-family: var(--mono);
+    font-size: 12px;
+    opacity: 0.55;
+    text-align: center;
+  }
+
+  .processing-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(246,243,236,0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    border-radius: 16px;
+    z-index: 10;
+  }
+  .processing-overlay.show { display: flex; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2.5px solid var(--line-strong);
+    border-top-color: var(--rust);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-text {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+  }
+
+  footer {
+    border-top: 1.5px solid var(--line-strong);
+    padding: 22px 0 32px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    opacity: 0.5;
+    text-align: center;
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  *:focus-visible {
+    outline: 2px solid var(--rust);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 36px; }
+    .hero { padding: 36px 0 40px; }
+    .dropzone { padding: 40px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="header-row">
+      <div class="logo">ClearShot<span class="dot">.</span></div>
+      <div class="tagline">erase · crop · cut out</div>
+    </div>
+  </header>
+</div>
+
+<!-- LANDING / UPLOAD -->
+<div class="wrap" id="landingView">
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">No signup · No upload to a server · Free</div>
+        <h1>Remove text from any photo, <em>privately.</em></h1>
+        <p class="hero-sub">Drop a screenshot, scan, or photo. Brush over text, watermarks, or stickers to erase them. Crop, or cut out the background — all in one place, all in your browser.</p>
+
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload an image">
+          <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="dz-title">Drop an image, or click to choose one</div>
+          <div class="dz-sub">JPG · PNG · WEBP — stays on this device</div>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="trust-row">
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Nothing leaves your device</div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>No account needed</div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Always free</div>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 320 320" fill="none">
+          <rect x="20" y="40" width="280" height="200" rx="10" fill="#ece7da" stroke="#16140f" stroke-opacity="0.18" stroke-width="1.5"/>
+          <rect x="44" y="64" width="140" height="14" rx="3" fill="#16140f" fill-opacity="0.12"/>
+          <rect x="44" y="88" width="90" height="14" rx="3" fill="#b5482e" fill-opacity="0.55"/>
+          <rect x="44" y="112" width="160" height="14" rx="3" fill="#16140f" fill-opacity="0.12"/>
+          <circle cx="225" cy="170" r="38" fill="#4a5a3f" fill-opacity="0.2"/>
+          <path d="M70 200l30-34 26 22 34-40" stroke="#16140f" stroke-opacity="0.3" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <g>
+            <circle cx="120" cy="95" r="22" fill="none" stroke="#b5482e" stroke-width="2" stroke-dasharray="4 4"/>
+            <path d="M132 107l14 14" stroke="#b5482e" stroke-width="2" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR -->
+<div class="wrap" id="editorView">
+  <div class="editor-shell">
+    <div class="toolbar">
+      <div class="tool-group">
+        <div class="tool-label">Tools</div>
+        <button class="tool-btn active" id="toolErase" data-tool="erase">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M16.24 3.56l4.2 4.2a1 1 0 010 1.41L9.17 20.44a1 1 0 01-.7.29H3.83a1 1 0 01-.71-1.71l13.41-13.41a1 1 0 011.71-.05z" stroke-linejoin="round"/><path d="M14.5 5.5l4 4" stroke-linecap="round"/></svg>
+          Erase / Remove text
+        </button>
+        <button class="tool-btn" id="toolCrop" data-tool="crop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2v14a2 2 0 002 2h14M18 22V8a2 2 0 00-2-2H2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Crop
+        </button>
+        <button class="tool-btn" id="toolBg" data-tool="bg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8l9-5 9 5-9 5-9-5z" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Remove background
+        </button>
+      </div>
+
+      <div class="tool-group" id="eraseControls">
+        <div class="tool-label">Brush</div>
+        <div class="slider-row">
+          <div class="slabel"><span>Size</span><span id="brushSizeVal">36px</span></div>
+          <input type="range" id="brushSize" min="8" max="120" value="36">
+        </div>
+        <p style="font-size:12px; opacity:0.6; line-height:1.45; margin:2px 0 0;">Paint over the text. It rebuilds the real background underneath — not a flat patch.</p>
+        <button class="tool-btn" id="undoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7v6h6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13a9 9 0 1 0 3-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Undo last stroke
+        </button>
+      </div>
+
+      <div class="tool-group" id="cropControls" style="display:none;">
+        <div class="tool-label">Crop</div>
+        <button class="action-btn primary" id="applyCropBtn">Apply crop</button>
+        <button class="tool-btn" id="cancelCropBtn">Cancel</button>
+      </div>
+
+      <div class="tool-group" id="bgControls" style="display:none;">
+        <div class="tool-label">Background</div>
+        <p style="font-size:12.5px; opacity:0.65; line-height:1.45; margin:0 0 4px;">Runs an on-device model. First run downloads it once (~10–20s), then it's cached.</p>
+        <button class="action-btn primary" id="runBgBtn">Cut out subject</button>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <div class="tool-group">
+        <div class="tool-label">File</div>
+        <button class="action-btn" id="resetBtn">Start over</button>
+        <button class="action-btn primary" id="downloadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4M12 16l-4-4M12 16l4-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18v1a2 2 0 002 2h12a2 2 0 002-2v-1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="canvas-stage" id="canvasStage">
+        <canvas id="mainCanvas"></canvas>
+        <div class="brush-cursor" id="brushCursor"></div>
+        <div class="processing-overlay" id="processingOverlay">
+          <div class="spinner"></div>
+          <div class="processing-text" id="processingText">Working on it…</div>
+        </div>
+      </div>
+      <div class="status-bar" id="statusBar">Brush over the text or watermark you want gone, then download.</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <footer>ClearShot — runs entirely in your browser. No images are uploaded anywhere.</footer>
+</div>
+
+<script type="module">
+let bgRemovalModule = null;
+
+const landingView = document.getElementById('landingView');
+const editorView = document.getElementById('editorView');
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const canvasStage = document.getElementById('canvasStage');
+const brushCursor = document.getElementById('brushCursor');
+const statusBar = document.getElementById('statusBar');
+const processingOverlay = document.getElementById('processingOverlay');
+const processingText = document.getElementById('processingText');
+
+let img = null;
+let history = [];
+let currentTool = 'erase';
+let brushSize = 36;
+let isDrawing = false;
+let lastPoint = null;
+let strokeStartSnapshot = null;
+
+// ---------- Upload handling ----------
+function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const image = new Image();
+    image.onload = () => {
+      img = image;
+      setupCanvas();
+      landingView.style.display = 'none';
+      editorView.style.display = 'block';
+    };
+    image.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+fileInput.addEventListener('change', (e) => loadFile(e.target.files[0]));
+
+['dragenter', 'dragover'].forEach(evt =>
+  dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('drag'); })
+);
+['dragleave', 'drop'].forEach(evt =>
+  dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('drag'); })
+);
+dropzone.addEventListener('drop', (e) => {
+  const file = e.dataTransfer.files[0];
+  loadFile(file);
+});
+
+// ---------- Canvas setup ----------
+function setupCanvas() {
+  const maxDim = 1400;
+  let w = img.width, h = img.height;
+  if (w > maxDim || h > maxDim) {
+    const scale = maxDim / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  canvas.width = w;
+  canvas.height = h;
+  ctx.drawImage(img, 0, 0, w, h);
+  history = [ctx.getImageData(0, 0, w, h)];
+  statusBar.textContent = 'Brush over the text or watermark you want gone, then download.';
+}
+
+function pushHistory() {
+  history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+  if (history.length > 25) history.shift();
+}
+
+function undo() {
+  if (history.length <= 1) return;
+  history.pop();
+  const prev = history[history.length - 1];
+  ctx.putImageData(prev, 0, 0);
+}
+
+// ---------- Tool switching ----------
+const toolButtons = {
+  erase: document.getElementById('toolErase'),
+  crop: document.getElementById('toolCrop'),
+  bg: document.getElementById('toolBg'),
+};
+const controlPanels = {
+  erase: document.getElementById('eraseControls'),
+  crop: document.getElementById('cropControls'),
+  bg: document.getElementById('bgControls'),
+};
+
+function setTool(tool) {
+  if (cropOverlay) cancelCrop();
+  currentTool = tool;
+  Object.entries(toolButtons).forEach(([k, btn]) => btn.classList.toggle('active', k === tool));
+  Object.entries(controlPanels).forEach(([k, el]) => el.style.display = k === tool ? 'flex' : 'none');
+  brushCursor.style.display = tool === 'erase' ? 'block' : 'none';
+  canvas.style.cursor = tool === 'erase' ? 'none' : (tool === 'crop' ? 'crosshair' : 'default');
+
+  if (tool === 'erase') statusBar.textContent = 'Brush over the text or watermark you want gone, then download.';
+  if (tool === 'crop') { statusBar.textContent = 'Drag to select the area to keep.'; startCrop(); }
+  if (tool === 'bg') statusBar.textContent = 'Click "Cut out subject" to remove the background.';
+}
+
+Object.entries(toolButtons).forEach(([key, btn]) => btn.addEventListener('click', () => setTool(key)));
+
+// ---------- Erase brush (content-aware-ish: samples nearby texture) ----------
+document.getElementById('brushSize').addEventListener('input', (e) => {
+  brushSize = parseInt(e.target.value, 10);
+  document.getElementById('brushSizeVal').textContent = brushSize + 'px';
+  updateBrushCursorSize();
+});
+
+function updateBrushCursorSize() {
+  brushCursor.style.width = brushSize + 'px';
+  brushCursor.style.height = brushSize + 'px';
+}
+updateBrushCursorSize();
+
+function getCanvasPoint(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY,
+    pageX: clientX - rect.left,
+    pageY: clientY - rect.top,
+  };
+}
+
+// ---------- Content-aware fill (patch-based inpainting) ----------
+// Strategy: while the user drags the brush, we only paint a translucent mask
+// overlay (no destructive edit yet) marking which pixels should be removed.
+// On mouse-up, we run a patch-match style inpaint: repeatedly find the
+// boundary pixels of the masked region, and for each one, search nearby
+// KNOWN (unmasked) image content for the best-matching small patch (comparing
+// the ring of already-known pixels around it), then copy that patch's center
+// color in. This "grows" real texture/edges inward from the surrounding
+// image instead of producing a flat blended color — so a brick wall, a
+// gradient, a checkered pattern, or a busy photo background all get
+// reconstructed with actual local texture rather than a smear.
+
+let maskCanvas = null;
+let maskCtx = null;
+
+function ensureMaskCanvas() {
+  if (!maskCanvas || maskCanvas.width !== canvas.width || maskCanvas.height !== canvas.height) {
+    maskCanvas = document.createElement('canvas');
+    maskCanvas.width = canvas.width;
+    maskCanvas.height = canvas.height;
+    maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+  }
+}
+
+function stampMask(cx, cy, radius) {
+  maskCtx.fillStyle = '#fff';
+  maskCtx.beginPath();
+  maskCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  maskCtx.fill();
+}
+
+function drawMaskStroke(p1, p2, radius) {
+  const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+  const steps = Math.max(1, Math.ceil(dist / (radius * 0.5)));
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    stampMask(p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t, radius);
+  }
+}
+
+// Renders the live image with the current in-progress mask tinted red, so the
+// user can see exactly what will be removed before committing the stroke.
+function renderMaskPreview(baseImageData) {
+  ctx.putImageData(baseImageData, 0, 0);
+  const w = canvas.width, h = canvas.height;
+  const maskData = maskCtx.getImageData(0, 0, w, h).data;
+  const liveData = ctx.getImageData(0, 0, w, h);
+  const d = liveData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (maskData[i + 3] > 0) {
+      d[i]     = d[i] * 0.55 + 200 * 0.45;
+      d[i + 1] = d[i + 1] * 0.55 + 60 * 0.45;
+      d[i + 2] = d[i + 2] * 0.55 + 50 * 0.45;
+    }
+  }
+  ctx.putImageData(liveData, 0, 0);
+}
+
+// Core patch-based inpaint. Operates directly on an ImageData's pixel buffer.
+function inpaintRegion(imageData, maskAlpha, w, h) {
+  const data = imageData.data;
+  // known[i] = 1 if pixel is NOT masked (i.e. trustworthy source content)
+  const known = new Uint8Array(w * h);
+  let remaining = 0;
+  for (let i = 0; i < w * h; i++) {
+    known[i] = maskAlpha[i] > 10 ? 0 : 1;
+    if (!known[i]) remaining++;
+  }
+  if (remaining === 0) return;
+
+  const PATCH = 4; // half-size of comparison patch (so patch is (2*PATCH+1)^2)
+  const SEARCH_RADIUS_STEP = 18; // how far out we search for matches, grows if needed
+
+  // Process in concentric "onion peel" layers: repeatedly find current
+  // boundary pixels (masked, with at least one known neighbor), fill them
+  // all using only currently-known pixels, mark them known, repeat.
+  let safety = 0;
+  while (remaining > 0 && safety < 4000) {
+    safety++;
+    // Find boundary pixels this pass
+    const boundary = [];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        if (known[idx]) continue;
+        // has a known neighbor?
+        if (
+          (x > 0 && known[idx - 1]) || (x < w - 1 && known[idx + 1]) ||
+          (y > 0 && known[idx - w]) || (y < h - 1 && known[idx + w]) ||
+          (x > 0 && y > 0 && known[idx - w - 1]) || (x < w - 1 && y > 0 && known[idx - w + 1]) ||
+          (x > 0 && y < h - 1 && known[idx + w - 1]) || (x < w - 1 && y < h - 1 && known[idx + w + 1])
+        ) {
+          boundary.push(idx);
+        }
+      }
+    }
+    if (boundary.length === 0) break;
+
+    for (const idx of boundary) {
+      const x = idx % w, y = (idx / w) | 0;
+      let bestScore = Infinity, bestX = -1, bestY = -1;
+      let searchR = SEARCH_RADIUS_STEP;
+
+      // expand search radius until we find at least one candidate
+      while (bestX === -1 && searchR <= Math.max(w, h)) {
+        const samples = 28; // candidate directions per radius ring, randomized
+        for (let s = 0; s < samples; s++) {
+          const angle = (s / samples) * Math.PI * 2 + Math.random() * 0.3;
+          const dist = searchR * (0.4 + Math.random() * 0.6);
+          const sx = Math.round(x + Math.cos(angle) * dist);
+          const sy = Math.round(y + Math.sin(angle) * dist);
+          if (sx < PATCH || sy < PATCH || sx >= w - PATCH || sy >= h - PATCH) continue;
+          const sIdx = sy * w + sx;
+          if (!known[sIdx]) continue;
+
+          // score = SSD over the overlap of known pixels in a small patch
+          // around (x,y) vs the same offsets around (sx,sy)
+          let score = 0, comparisons = 0;
+          for (let dy = -PATCH; dy <= PATCH; dy++) {
+            for (let dx = -PATCH; dx <= PATCH; dx++) {
+              const px = x + dx, py = y + dy;
+              if (px < 0 || py < 0 || px >= w || py >= h) continue;
+              const pIdx = py * w + px;
+              if (!known[pIdx]) continue;
+              const qx = sx + dx, qy = sy + dy;
+              if (qx < 0 || qy < 0 || qx >= w || qy >= h) continue;
+              const qIdx = qy * w + qx;
+              const pOff = pIdx * 4, qOff = qIdx * 4;
+              const dr = data[pOff] - data[qOff];
+              const dg = data[pOff + 1] - data[qOff + 1];
+              const db = data[pOff + 2] - data[qOff + 2];
+              score += dr * dr + dg * dg + db * db;
+              comparisons++;
+            }
+          }
+          if (comparisons < 3) continue;
+          score = score / comparisons;
+          if (score < bestScore) {
+            bestScore = score;
+            bestX = sx; bestY = sy;
+          }
+        }
+        searchR += SEARCH_RADIUS_STEP;
+      }
+
+      if (bestX !== -1) {
+        const srcOff = (bestY * w + bestX) * 4;
+        const dstOff = idx * 4;
+        // tiny jitter so large filled areas don't look stamped/repetitive
+        const jitter = () => (Math.random() - 0.5) * 6;
+        data[dstOff]     = Math.max(0, Math.min(255, data[srcOff] + jitter()));
+        data[dstOff + 1] = Math.max(0, Math.min(255, data[srcOff + 1] + jitter()));
+        data[dstOff + 2] = Math.max(0, Math.min(255, data[srcOff + 2] + jitter()));
+        data[dstOff + 3] = 255;
+        known[idx] = 1;
+        remaining--;
+      }
+    }
+  }
+}
+
+canvas.addEventListener('mousemove', (e) => {
+  const p = getCanvasPoint(e);
+  brushCursor.style.left = p.pageX + 'px';
+  brushCursor.style.top = p.pageY + 'px';
+});
+canvas.addEventListener('mouseenter', () => { if (currentTool === 'erase') brushCursor.style.display = 'block'; });
+canvas.addEventListener('mouseleave', () => { brushCursor.style.display = 'none'; isDrawing = false; });
+
+function startDraw(e) {
+  if (currentTool !== 'erase') return;
+  isDrawing = true;
+  ensureMaskCanvas();
+  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+  strokeStartSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const p = getCanvasPoint(e);
+  lastPoint = p;
+  stampMask(p.x, p.y, brushSize / 2);
+  renderMaskPreview(strokeStartSnapshot);
+}
+function moveDraw(e) {
+  if (!isDrawing || currentTool !== 'erase') return;
+  const p = getCanvasPoint(e);
+  drawMaskStroke(lastPoint, p, brushSize / 2);
+  lastPoint = p;
+  renderMaskPreview(strokeStartSnapshot);
+}
+function endDraw() {
+  if (!isDrawing) return;
+  isDrawing = false;
+
+  // Restore clean (un-tinted) pixels, then run the real inpaint over the masked area.
+  const w = canvas.width, h = canvas.height;
+  const workingData = new ImageData(
+    new Uint8ClampedArray(strokeStartSnapshot.data),
+    w, h
+  );
+  const maskAlphaFull = maskCtx.getImageData(0, 0, w, h).data;
+  const maskAlpha = new Uint8Array(w * h);
+  for (let i = 0, p = 0; i < maskAlphaFull.length; i += 4, p++) {
+    maskAlpha[p] = maskAlphaFull[i + 3];
+  }
+
+  statusBar.textContent = 'Filling in the background…';
+  processingOverlay.classList.add('show');
+  processingText.textContent = 'Reconstructing background…';
+
+  // Defer slightly so the overlay paints before the (synchronous) inpaint runs.
+  setTimeout(() => {
+    inpaintRegion(workingData, maskAlpha, w, h);
+    ctx.putImageData(workingData, 0, 0);
+    pushHistory();
+    processingOverlay.classList.remove('show');
+    statusBar.textContent = 'Done. Keep brushing, or download.';
+  }, 30);
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', moveDraw);
+window.addEventListener('mouseup', endDraw);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDraw(e); }, { passive: false });
+canvas.addEventListener('touchend', endDraw);
+
+document.getElementById('undoBtn').addEventListener('click', undo);
+
+// ---------- Crop tool ----------
+let cropOverlay = null;
+let cropDragMode = null;
+let cropStart = null;
+let cropRect = { x: 0.15, y: 0.15, w: 0.7, h: 0.7 }; // relative
+
+function startCrop() {
+  removeCropOverlay();
+  cropOverlay = document.createElement('div');
+  cropOverlay.className = 'crop-overlay';
+  canvasStage.appendChild(cropOverlay);
+  ['nw','ne','sw','se'].forEach(pos => {
+    const handle = document.createElement('div');
+    handle.className = 'crop-handle';
+    handle.dataset.pos = pos;
+    cropOverlay.appendChild(handle);
+  });
+  renderCropOverlay();
+
+  cropOverlay.addEventListener('mousedown', onCropMouseDown);
+  window.addEventListener('mousemove', onCropMouseMove);
+  window.addEventListener('mouseup', onCropMouseUp);
+}
+
+function renderCropOverlay() {
+  if (!cropOverlay) return;
+  const rect = canvas.getBoundingClientRect();
+  const stageRect = canvasStage.getBoundingClientRect();
+  const left = rect.left - stageRect.left;
+  const top = rect.top - stageRect.top;
+  const px = left + cropRect.x * rect.width;
+  const py = top + cropRect.y * rect.height;
+  const pw = cropRect.w * rect.width;
+  const ph = cropRect.h * rect.height;
+  cropOverlay.style.left = px + 'px';
+  cropOverlay.style.top = py + 'px';
+  cropOverlay.style.width = pw + 'px';
+  cropOverlay.style.height = ph + 'px';
+
+  const hs = 10;
+  cropOverlay.querySelectorAll('.crop-handle').forEach(h => {
+    const pos = h.dataset.pos;
+    h.style.left = (pos.includes('e') ? pw - hs/2 : -hs/2) + 'px';
+    h.style.top = (pos.includes('s') ? ph - hs/2 : -hs/2) + 'px';
+  });
+}
+
+function onCropMouseDown(e) {
+  const target = e.target;
+  cropDragMode = target.dataset.pos || 'move';
+  cropStart = { x: e.clientX, y: e.clientY, rect: { ...cropRect } };
+  e.stopPropagation();
+}
+function onCropMouseMove(e) {
+  if (!cropDragMode || !cropStart) return;
+  const rect = canvas.getBoundingClientRect();
+  const dx = (e.clientX - cropStart.x) / rect.width;
+  const dy = (e.clientY - cropStart.y) / rect.height;
+  let { x, y, w, h } = cropStart.rect;
+
+  if (cropDragMode === 'move') {
+    x = Math.min(Math.max(0, cropStart.rect.x + dx), 1 - w);
+    y = Math.min(Math.max(0, cropStart.rect.y + dy), 1 - h);
+  } else {
+    if (cropDragMode.includes('w')) { x = Math.min(Math.max(0, cropStart.rect.x + dx), cropStart.rect.x + w - 0.05); w = cropStart.rect.w - (x - cropStart.rect.x); }
+    if (cropDragMode.includes('e')) { w = Math.min(Math.max(0.05, cropStart.rect.w + dx), 1 - cropStart.rect.x); }
+    if (cropDragMode.includes('n')) { y = Math.min(Math.max(0, cropStart.rect.y + dy), cropStart.rect.y + h - 0.05); h = cropStart.rect.h - (y - cropStart.rect.y); }
+    if (cropDragMode.includes('s')) { h = Math.min(Math.max(0.05, cropStart.rect.h + dy), 1 - cropStart.rect.y); }
+  }
+  cropRect = { x, y, w, h };
+  renderCropOverlay();
+}
+function onCropMouseUp() { cropDragMode = null; }
+
+function removeCropOverlay() {
+  if (cropOverlay) { cropOverlay.remove(); cropOverlay = null; }
+  window.removeEventListener('mousemove', onCropMouseMove);
+  window.removeEventListener('mouseup', onCropMouseUp);
+}
+
+function cancelCrop() {
+  removeCropOverlay();
+}
+
+document.getElementById('cancelCropBtn').addEventListener('click', () => {
+  cancelCrop();
+  setTool('erase');
+});
+
+document.getElementById('applyCropBtn').addEventListener('click', () => {
+  const w = canvas.width, h = canvas.height;
+  const sx = cropRect.x * w, sy = cropRect.y * h, sw = cropRect.w * w, sh = cropRect.h * h;
+  const imageData = ctx.getImageData(sx, sy, sw, sh);
+  canvas.width = sw;
+  canvas.height = sh;
+  ctx.putImageData(imageData, 0, 0);
+  pushHistory();
+  cancelCrop();
+  cropRect = { x: 0.15, y: 0.15, w: 0.7, h: 0.7 };
+  setTool('erase');
+  statusBar.textContent = 'Cropped. Keep going, or download.';
+});
+
+window.addEventListener('resize', renderCropOverlay);
+
+// ---------- Background removal (on-device model) ----------
+document.getElementById('runBgBtn').addEventListener('click', async () => {
+  processingOverlay.classList.add('show');
+  processingText.textContent = 'Loading model… (first time only)';
+  try {
+    if (!bgRemovalModule) {
+      bgRemovalModule = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/index.mjs');
+    }
+    processingText.textContent = 'Removing background…';
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const resultBlob = await bgRemovalModule.removeBackground(blob, {
+      publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/',
+    });
+    const url = URL.createObjectURL(resultBlob);
+    const resultImg = new Image();
+    resultImg.onload = () => {
+      canvas.width = resultImg.width;
+      canvas.height = resultImg.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(resultImg, 0, 0);
+      pushHistory();
+      URL.revokeObjectURL(url);
+      processingOverlay.classList.remove('show');
+      statusBar.textContent = 'Background removed. Download, or keep editing.';
+      setTool('erase');
+    };
+    resultImg.src = url;
+  } catch (err) {
+    console.error(err);
+    processingOverlay.classList.remove('show');
+    statusBar.textContent = 'Background removal needs an internet connection for the first run. Check your connection and try again.';
+  }
+});
+
+// ---------- Download / reset ----------
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'clearshot-edited.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  cancelCrop();
+  editorView.style.display = 'none';
+  landingView.style.display = 'block';
+  fileInput.value = '';
+  img = null;
+  history = [];
+});
+</script>
+</body>
+</html>
